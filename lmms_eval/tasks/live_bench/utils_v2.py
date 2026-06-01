@@ -7,12 +7,12 @@ import time
 from io import BytesIO
 from pathlib import Path
 
+import httpx
 import numpy as np
 import openai
 import pandas as pd
 import requests
 import yaml
-import httpx
 
 eval_logger = logging.getLogger("lmms-eval")
 
