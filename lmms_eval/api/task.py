@@ -67,6 +67,36 @@ def _expand_cache_path(path: str) -> str:
     return os.path.expanduser(os.path.expandvars(path))
 
 
+def _resolve_local_dataset_path(dataset_path: str) -> str:
+    local_root = os.getenv("LMMS_EVAL_LOCAL_DATASET_ROOT") or os.getenv("LOCAL_DATASET_ROOT")
+    if not local_root or not dataset_path:
+        return dataset_path
+
+    local_root = _expand_cache_path(local_root)
+    local_dataset_map = {
+        "lmms-lab/textvqa": "textvqa",
+        "lmms-lab/DocVQA": "InfographicVQA",
+        "lmms-lab/SEED-Bench-2": "SEED-Bench-2",
+        "lmms-lab/LiveBench": "LiveBench",
+        "lmms-lab/ScienceQA": "ScienceQA",
+        "lmms-lab/MME": "MME",
+        "lmms-lab/MMBench": "MMBench",
+        "lmms-lab/RealWorldQA": "RealWorldQA",
+        "lmms-lab/TextCaps": "TextCaps",
+    }
+    local_dir = local_dataset_map.get(dataset_path)
+    if local_dir is None:
+        return dataset_path
+
+    local_path = os.path.join(local_root, local_dir)
+    if os.path.isdir(local_path):
+        eval_logger.info(f"Using local dataset path for {dataset_path}: {local_path}")
+        return local_path
+
+    eval_logger.warning(f"LOCAL_DATASET_ROOT is set, but local dataset path was not found for {dataset_path}: {local_path}")
+    return dataset_path
+
+
 @lru_cache(maxsize=1)
 def _resolve_hf_datasets_cache_dir() -> str:
     """Pick a datasets cache directory that is safe for file locks."""
@@ -802,6 +832,8 @@ class ConfigurableTask(Task):
 
         if self.config.dataset_path is not None:
             self.DATASET_PATH = self.config.dataset_path
+
+        self.DATASET_PATH = _resolve_local_dataset_path(self.DATASET_PATH)
 
         if self.config.dataset_name is not None:
             self.DATASET_NAME = self.config.dataset_name

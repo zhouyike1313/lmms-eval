@@ -68,9 +68,12 @@ echo "[run] DISABLE_CUDNN=${DISABLE_CUDNN:-0}"
 echo "[run] USE_ACCELERATE=${USE_ACCELERATE:-0} ALL_IN_ONE=${ALL_IN_ONE:-0}"
 echo "[run] USE_RESPONSE_CACHE=${USE_RESPONSE_CACHE:-1} LOG_SAMPLES=${LOG_SAMPLES:-1} QUIET_LOGS=${QUIET_LOGS:-0}"
 echo "[run] FORCE_SAFE_LLAVA_BATCH_SIZE=${FORCE_SAFE_LLAVA_BATCH_SIZE:-0}"
+echo "[run] MAIN_PROCESS_PORT=${MAIN_PROCESS_PORT:-0}"
 echo "[run] MODEL_PATH=${MODEL_PATH}"
 echo "[run] OUTPUT_ROOT=${OUTPUT_ROOT}"
 echo "[run] CACHE_ROOT=${CACHE_ROOT}"
+echo "[run] LOCAL_DATASET_ROOT=${LMMS_EVAL_LOCAL_DATASET_ROOT:-${LOCAL_DATASET_ROOT:-<unset>}}"
+echo "[run] HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-0} HF_DATASETS_OFFLINE=${HF_DATASETS_OFFLINE:-0} TRANSFORMERS_OFFLINE=${TRANSFORMERS_OFFLINE:-0}"
 echo "[run] JAVA_HOME=${JAVA_HOME:-<unset>}"
 echo "[run] HF_TOKEN_SET=$([[ -n "${HF_TOKEN:-}" ]] && echo 1 || echo 0)"
 
@@ -84,6 +87,7 @@ if [[ "${USE_ACCELERATE:-0}" == "1" ]]; then
   BASE_CMD=(accelerate launch
     --num_processes "${NUM_PROCESSES}"
     --num_machines "${NUM_MACHINES:-1}"
+    --main_process_port "${MAIN_PROCESS_PORT:-0}"
     --mixed_precision "${MIXED_PRECISION:-no}"
     --dynamo_backend "${DYNAMO_BACKEND:-no}"
     -m lmms_eval)
